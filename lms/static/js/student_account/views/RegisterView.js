@@ -65,6 +65,56 @@
                     this.listenTo(this.model, 'validation', this.renderLiveValidations);
                 },
 
+
+                buildForm: function(data) {
+                    var html = [],
+                        i,
+                        len = data.length,
+                        requiredFields = [],
+                        optionalFields = [],
+                        fieldTpl = this.fieldTpl;
+
+                    this.fields = data;
+
+                    for (i = 0; i < len; i++) {
+                        if (data[i].errorMessages) {
+                            // eslint-disable-next-line no-param-reassign
+                            data[i].errorMessages = this.escapeStrings(data[i].errorMessages);
+                        }
+
+                        if (data[i].required) {
+                            requiredFields.push(data[i]);
+                        } else {
+                            optionalFields.push(data[i]);
+                        }
+                    }
+
+                    html.push('<div class="required-fields">');
+                    for (i = 0; i < requiredFields.length; i++) {
+                        html.push(_.template(fieldTpl)($.extend(requiredFields[i], {
+                            form: this.formType,
+                            requiredStr: this.requiredStr,
+                            optionalStr: this.optionalStr,
+                            supplementalText: requiredFields[i].supplementalText || '',
+                            supplementalLink: requiredFields[i].supplementalLink || ''
+                        })));
+                    }
+                    html.push('</div>');
+                    html.push('<div class="optional-fields">');
+
+                    for (i = 0; i < optionalFields.length; i++) {
+                        html.push(_.template(fieldTpl)($.extend(optionalFields[i], {
+                            form: this.formType,
+                            requiredStr: this.requiredStr,
+                            optionalStr: this.optionalStr,
+                            supplementalText: optionalFields[i].supplementalText || '',
+                            supplementalLink: optionalFields[i].supplementalLink || ''
+                        })));
+                    }
+                    html.push('</div>');
+                    this.render(html.join(''));
+                },
+
                 render: function(html) {
                     var fields = html || '',
                         formErrorsTitle = gettext('An error occurred.');
@@ -100,6 +150,14 @@
                     }
 
                     return this;
+                },
+
+                postRender: function() {
+                    FormView.prototype.postRender.call(this);
+                    $('.optional-fields').hide();
+                    $('#toggle_optional_fields').change(function() {
+                        $('.optional-fields').toggle(300);
+                    });
                 },
 
                 hideRequiredMessageExceptOnError: function($el) {
