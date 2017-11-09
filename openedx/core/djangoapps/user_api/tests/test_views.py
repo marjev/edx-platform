@@ -972,6 +972,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
             "default": False
         }
     ]
+    link_template = "<a href='/honor' target='_blank'>{link_label}</a>"
 
     def setUp(self):
         super(RegistrationViewTest, self).setUp()
@@ -1007,7 +1008,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"required": True,
                 u"label": u"Email",
                 u"placeholder": u"username@domain.com",
-                u"instructions": u"This is what you will use to login.",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1023,7 +1023,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"required": True,
                 u"label": u"Full Name",
                 u"placeholder": u"Jane Q. Learner",
-                u"instructions": u"This name will be used on any certificates that you earn.",
                 u"restrictions": {
                     "max_length": 255
                 },
@@ -1038,8 +1037,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"required": True,
                 u"label": u"Public Username",
                 u"placeholder": u"Jane_Q_Learner",
-                u"instructions": u"The name that will identify you in your courses. "
-                                 u"It cannot be changed later.",
                 u"restrictions": {
                     "min_length": USERNAME_MIN_LENGTH,
                     "max_length": USERNAME_MAX_LENGTH
@@ -1075,7 +1072,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"required": True,
                 u"label": u"Email",
                 u"placeholder": u"username@domain.com",
-                u"instructions": u"This is what you will use to login.",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1172,7 +1168,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"required": True,
                     u"label": u"Email",
                     u"placeholder": u"username@domain.com",
-                    u"instructions": u"This is what you will use to login.",
                     u"restrictions": {
                         "min_length": EMAIL_MIN_LENGTH,
                         "max_length": EMAIL_MAX_LENGTH
@@ -1190,7 +1185,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"required": True,
                     u"label": u"Full Name",
                     u"placeholder": u"Jane Q. Learner",
-                    u"instructions": u"This name will be used on any certificates that you earn.",
                     u"restrictions": {
                         "max_length": NAME_MAX_LENGTH,
                     }
@@ -1207,8 +1201,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"required": True,
                     u"label": u"Public Username",
                     u"placeholder": u"Jane_Q_Learner",
-                    u"instructions": u"The name that will identify you in your courses. "
-                                     u"It cannot be changed later.",
                     u"restrictions": {
                         "min_length": USERNAME_MIN_LENGTH,
                         "max_length": USERNAME_MAX_LENGTH
@@ -1226,7 +1218,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"select",
                     u"required": True,
                     u"options": country_options,
-                    u"instructions": u"The country or region where you live.",
                     u"errorMessages": {
                         u"required": u"Select your country or region of residence."
                     },
@@ -1492,7 +1483,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 "label": "Country or Region of Residence",
                 "name": "country",
                 "type": "select",
-                "instructions": "The country or region where you live.",
                 "required": True,
                 "options": country_options,
                 "errorMessages": {
@@ -1520,13 +1510,14 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
     )
     @mock.patch.dict(settings.FEATURES, {"ENABLE_MKTG_SITE": True})
     def test_registration_honor_code_mktg_site_enabled(self):
-        link_label = 'Terms of Service and Honor Code'
+        link_template = "<a href='https://www.test.com/honor' target='_blank'>{link_label}</a>"
+        link_label = "Terms of Service and Honor Code"
         self._assert_reg_field(
             {"honor_code": "required"},
             {
                 "label": u"I agree to the {platform_name} {link_label}".format(
                     platform_name=settings.PLATFORM_NAME,
-                    link_label=link_label
+                    link_label=link_template.format(link_label=link_label)
                 ),
                 "name": "honor_code",
                 "defaultValue": False,
@@ -1544,13 +1535,13 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
     @override_settings(MKTG_URLS_LINK_MAP={"HONOR": "honor"})
     @mock.patch.dict(settings.FEATURES, {"ENABLE_MKTG_SITE": False})
     def test_registration_honor_code_mktg_site_disabled(self):
-        link_label = 'Terms of Service and Honor Code'
+        link_label = "Terms of Service and Honor Code"
         self._assert_reg_field(
             {"honor_code": "required"},
             {
                 "label": u"I agree to the {platform_name} {link_label}".format(
                     platform_name=settings.PLATFORM_NAME,
-                    link_label=link_label
+                    link_label=self.link_template.format(link_label=link_label)
                 ),
                 "name": "honor_code",
                 "defaultValue": False,
@@ -1575,12 +1566,13 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
         # Honor code field should say ONLY honor code,
         # not "terms of service and honor code"
         link_label = 'Honor Code'
+        link_template = "<a href='https://www.test.com/honor' target='_blank'>{link_label}</a>"
         self._assert_reg_field(
             {"honor_code": "required", "terms_of_service": "required"},
             {
                 "label": u"I agree to the {platform_name} {link_label}".format(
                     platform_name=settings.PLATFORM_NAME,
-                    link_label=link_label
+                    link_label=link_template.format(link_label=link_label)
                 ),
                 "name": "honor_code",
                 "defaultValue": False,
@@ -1596,7 +1588,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
         )
 
         # Terms of service field should also be present
-        link_label = 'Terms of Service'
+        link_label = "Terms of Service"
         self._assert_reg_field(
             {"honor_code": "required", "terms_of_service": "required"},
             {
@@ -1622,11 +1614,13 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
     def test_registration_separate_terms_of_service_mktg_site_disabled(self):
         # Honor code field should say ONLY honor code,
         # not "terms of service and honor code"
+        link_label = 'Honor Code'
         self._assert_reg_field(
             {"honor_code": "required", "terms_of_service": "required"},
             {
-                "label": u"I agree to the {platform_name} Honor Code".format(
-                    platform_name=settings.PLATFORM_NAME
+                "label": u"I agree to the {platform_name} {link_label}".format(
+                    platform_name=settings.PLATFORM_NAME,
+                    link_label=self.link_template.format(link_label=link_label)
                 ),
                 "name": "honor_code",
                 "defaultValue": False,
@@ -1640,12 +1634,14 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
             }
         )
 
+        link_label = 'Terms of Service'
         # Terms of service field should also be present
         self._assert_reg_field(
             {"honor_code": "required", "terms_of_service": "required"},
             {
-                "label": u"I agree to the {platform_name} Terms of Service".format(
-                    platform_name=settings.PLATFORM_NAME
+                "label": u"I agree to the {platform_name} {link_label}".format(
+                    platform_name=settings.PLATFORM_NAME,
+                    link_label=link_label
                 ),
                 "name": "terms_of_service",
                 "defaultValue": False,

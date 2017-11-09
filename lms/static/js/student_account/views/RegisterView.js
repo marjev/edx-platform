@@ -5,12 +5,14 @@
         'underscore',
         'gettext',
         'edx-ui-toolkit/js/utils/string-utils',
+        'edx-ui-toolkit/js/utils/html-utils',
         'js/student_account/views/FormView',
         'text!templates/student_account/form_status.underscore'
     ],
         function(
             $, _, gettext,
             StringUtils,
+            HtmlUtils,
             FormView,
             formStatusTpl
         ) {
@@ -91,7 +93,7 @@
 
                     html.push('<div class="required-fields">');
                     for (i = 0; i < requiredFields.length; i++) {
-                        html.push(_.template(fieldTpl)($.extend(requiredFields[i], {
+                        html.push(HtmlUtils.template(fieldTpl)($.extend(requiredFields[i], {
                             form: this.formType,
                             requiredStr: this.requiredStr,
                             optionalStr: this.optionalStr,
@@ -103,7 +105,7 @@
                     html.push('<div class="optional-fields">');
 
                     for (i = 0; i < optionalFields.length; i++) {
-                        html.push(_.template(fieldTpl)($.extend(optionalFields[i], {
+                        html.push(HtmlUtils.template(fieldTpl)($.extend(optionalFields[i], {
                             form: this.formType,
                             requiredStr: this.requiredStr,
                             optionalStr: this.optionalStr,
