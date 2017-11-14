@@ -155,11 +155,91 @@
                 },
 
                 postRender: function() {
+                    var inputs = [
+                            $('#register-name'),
+                            $('#register-email'),
+                            $('#register-username'),
+                            $('#register-password'),
+                            $('#register-country')
+                        ],
+                        inputTipSelectors = ['tip error', 'tip tip-input'],
+                        focusinStyles = {
+                            position: 'relative',
+                            'padding-top': '0px',
+                            'padding-left': '0px',
+                            opacity: '1.0'
+                        },
+                        focusoutStyles = {
+                            position: 'absolute',
+                            'padding-top': '5px',
+                            'padding-left': '9px',
+                            opacity: '0.75',
+                            'z-index': '1'
+                        },
+                        onInputFocus = function() {
+                            // Apply on focus styles to input
+                            $(this).prev('label').css(focusinStyles);
+
+                            // Show each input tip
+                            $(this).siblings().each(function() {
+                                if (inputTipSelectors.includes($(this).attr('class'))) {
+                                    $(this).show();
+                                }
+                            });
+                        },
+                        onInputFocusOut = function() {
+                            // If input has no text apply focus out styles
+                            if ($(this).val().length === 0) {
+                                $(this).prev('label').css(focusoutStyles);
+                            }
+
+                            // Hide each input tip
+                            $(this).siblings().each(function() {
+                                if (inputTipSelectors.includes($(this).attr('class'))) {
+                                    $(this).hide();
+                                }
+                            });
+                        },
+                        handleInputBehavior = function(input) {
+                            // Initially put label in input
+                            if (input.val().length === 0) {
+                                input.prev('label').css(focusoutStyles);
+                            }
+
+                            // Initially hide each input tip
+                            input.siblings().each(function() {
+                                if (inputTipSelectors.includes($(this).attr('class'))) {
+                                    $(this).hide();
+                                }
+                            });
+
+                            input.focusin(onInputFocus);
+                            input.focusout(onInputFocusOut);
+                        },
+                        handleAutocomplete = function() {
+                            inputs.forEach(function(input) {
+                                if (input.val().length === 0 && !input.is(':-webkit-autofill')) {
+                                    input.prev('label').css(focusoutStyles);
+                                } else {
+                                    input.prev('label').css(focusinStyles);
+                                }
+                            });
+                        };
+
                     FormView.prototype.postRender.call(this);
                     $('.optional-fields').hide();
                     $('#toggle_optional_fields').change(function() {
+                        window.analytics.track('edx.bi.user.register.optional_fields_selected');
                         $('.optional-fields').toggle(300);
                     });
+
+                    $('#register-country option:first').html('');
+                    inputs.forEach(function(input) {
+                        if (input.length > 0) {
+                            handleInputBehavior(input);
+                        }
+                    });
+                    setTimeout(handleAutocomplete, 1000);
                 },
 
                 hideRequiredMessageExceptOnError: function($el) {
