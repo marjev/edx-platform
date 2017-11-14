@@ -1007,7 +1007,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"email",
                 u"required": True,
                 u"label": u"Email",
-                u"placeholder": u"username@domain.com",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1022,7 +1021,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"text",
                 u"required": True,
                 u"label": u"Full Name",
-                u"placeholder": u"Jane Q. Learner",
                 u"restrictions": {
                     "max_length": 255
                 },
@@ -1036,7 +1034,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"text",
                 u"required": True,
                 u"label": u"Public Username",
-                u"placeholder": u"Jane_Q_Learner",
                 u"restrictions": {
                     "min_length": USERNAME_MIN_LENGTH,
                     "max_length": USERNAME_MAX_LENGTH
@@ -1071,7 +1068,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"email",
                 u"required": True,
                 u"label": u"Email",
-                u"placeholder": u"username@domain.com",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1167,7 +1163,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"email",
                     u"required": True,
                     u"label": u"Email",
-                    u"placeholder": u"username@domain.com",
                     u"restrictions": {
                         "min_length": EMAIL_MIN_LENGTH,
                         "max_length": EMAIL_MAX_LENGTH
@@ -1184,7 +1179,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"text",
                     u"required": True,
                     u"label": u"Full Name",
-                    u"placeholder": u"Jane Q. Learner",
                     u"restrictions": {
                         "max_length": NAME_MAX_LENGTH,
                     }
@@ -1200,7 +1194,6 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"text",
                     u"required": True,
                     u"label": u"Public Username",
-                    u"placeholder": u"Jane_Q_Learner",
                     u"restrictions": {
                         "min_length": USERNAME_MIN_LENGTH,
                         "max_length": USERNAME_MAX_LENGTH

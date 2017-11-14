@@ -278,15 +278,10 @@ class RegistrationFormFactory(object):
         # meant to hold the user's email address.
         email_label = _(u"Email")
 
-        # Translators: This example email address is used as a placeholder in
-        # a field on the registration form meant to hold the user's email address.
-        email_placeholder = _(u"username@domain.com")
-
         form_desc.add_field(
             "email",
             field_type="email",
             label=email_label,
-            placeholder=email_placeholder,
             restrictions={
                 "min_length": accounts.EMAIL_MIN_LENGTH,
                 "max_length": accounts.EMAIL_MAX_LENGTH,
@@ -326,14 +321,9 @@ class RegistrationFormFactory(object):
         # meant to hold the user's full name.
         name_label = _(u"Full Name")
 
-        # Translators: This example name is used as a placeholder in
-        # a field on the registration form meant to hold the user's name.
-        name_placeholder = _(u"Jane Q. Learner")
-
         form_desc.add_field(
             "name",
             label=name_label,
-            placeholder=name_placeholder,
             restrictions={
                 "max_length": accounts.NAME_MAX_LENGTH,
             },
@@ -351,14 +341,9 @@ class RegistrationFormFactory(object):
         # meant to hold the user's public username.
         username_label = _(u"Public Username")
 
-        # Translators: This example username is used as a placeholder in
-        # a field on the registration form meant to hold the user's username.
-        username_placeholder = _(u"Jane_Q_Learner")
-
         form_desc.add_field(
             "username",
             label=username_label,
-            placeholder=username_placeholder,
             restrictions={
                 "min_length": accounts.USERNAME_MIN_LENGTH,
                 "max_length": accounts.USERNAME_MAX_LENGTH,
