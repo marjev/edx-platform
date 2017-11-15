@@ -1,16 +1,18 @@
 from datetime import datetime
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
 
 def is_entitlement_expired(entitlement, policy):
     """
     Determines from the policy if an entitlement can be redeemed, if it has not passed the
-    expiration period of policy.expiration_period_days
+    expiration period of policy.expiration_period_days, and has not already been redeemed
 
     :param entitlement:
     :param policy:
     :return:
     """
-    return (datetime.utcnow() - entitlement.created).days < policy.expiration_period_days
+    return ((datetime.utcnow() - entitlement.created).days < policy.expiration_period_days and
+            not entitlement.enrollment_course_run)
 
 
 def is_entitlement_refundable(entitlement, policy):
@@ -22,8 +24,8 @@ def is_entitlement_refundable(entitlement, policy):
     :return:
     """
 
-    return ((datetime.utcnow() - entitlement.created).days < policy.refund_period_days
-            and entitlement.entitlement.enrollment_course_run is None)
+    return ((datetime.utcnow() - entitlement.created).days < policy.refund_period_days and
+            not entitlement.entitlement.enrollment_course_run)
 
 
 def is_entitlement_regainable(entitlement, policy):
@@ -36,7 +38,9 @@ def is_entitlement_regainable(entitlement, policy):
     :param policy:
     :return:
     """
-    # Get the start date of the course
-    # Get the entitlement's
-
-    return True
+    if entitlement.enrollment_course_run:
+        course_overview = CourseOverview.objects.filter(id=entitlement.enrollment_course_run.course_id)
+        now = datetime.utcnow()
+        return ((now - course_overview.start).days < policy.regain_period_days or
+                (now - entitlement.enrollment_course_run.created).days < policy.regain_period_days)
+    return False
