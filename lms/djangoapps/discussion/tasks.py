@@ -45,11 +45,7 @@ def send_ace_message(context):
     context['site'] = Site.objects.get(id=context['site_id'])
     if _should_send_message(context):
         thread_author = User.objects.get(id=context['thread_author_id'])
-        middleware_classes = [
-            CurrentRequestUserMiddleware,
-            CurrentSiteThemeMiddleware,
-        ]
-        with emulate_http_request(site=context['site'], user=thread_author, middleware_classes=middleware_classes):
+        with emulate_http_request(site=context['site'], user=thread_author):
             message_context = _build_message_context(context)
             message = ResponseNotification().personalize(
                 Recipient(thread_author.username, thread_author.email),

@@ -186,11 +186,7 @@ def _schedule_send(msg_str, site_id, delivery_config_var, log_prefix):
         msg = Message.from_string(msg_str)
 
         user = User.objects.get(username=msg.recipient.username)
-        middleware_classes = [
-            CurrentRequestUserMiddleware,
-            CurrentSiteThemeMiddleware,
-        ]
-        with emulate_http_request(site=site, user=user, middleware_classes=middleware_classes):
+        with emulate_http_request(site=site, user=user):
             _annonate_send_task_for_monitoring(msg)
             LOG.debug('%s: Sending message = %s', log_prefix, msg_str)
             ace.send(msg)
