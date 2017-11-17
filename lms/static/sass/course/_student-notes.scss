@@ -478,6 +478,10 @@ $divider-visual-tertiary: ($baseline/20) solid $gray-l4;
   .placeholder {
     border-top: 1px solid theme-color("gray-dark");
     padding: ($baseline*1.5);
+
+    a {
+      color: $blue-d1;
+    }
   }
 
   .placeholder-title {
