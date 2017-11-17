@@ -19,7 +19,6 @@ class ScheduleAdmin(admin.ModelAdmin):
     inlines = (ScheduleExperienceAdminInline,)
     actions = ['deactivate_schedules', 'activate_schedules', 'set_experience_to_default', 'set_experience_to_course_updates']
 
-
     def deactivate_schedules(self, request, queryset):
         rows_updated = queryset.update(active=False)
         self.message_user(request, "{} schedule(s) were deactivated".format(rows_updated))
