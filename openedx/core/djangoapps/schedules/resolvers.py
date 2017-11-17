@@ -243,7 +243,7 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
         first_schedule = user_schedules[0]
         context = {
             'course_name': first_schedule.enrollment.course.display_name,
-            'course_url': _get_course_home_url(first_schedule.enrollment.course_id),
+            'course_url': _get_trackable_course_home_url(first_schedule.enrollment.course_id),
         }
 
         # Information for including upsell messaging in template.
@@ -283,7 +283,7 @@ class UpgradeReminderResolver(BinnedSchedulesBaseResolver):
             course_id_str = str(schedule.enrollment.course_id)
             course_id_strs.append(course_id_str)
             course_links.append({
-                'url': _get_course_home_url(schedule.enrollment.course_id),
+                'url': _get_trackable_course_home_url(schedule.enrollment.course_id),
                 'name': schedule.enrollment.course.display_name
             })
 
@@ -358,7 +358,7 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
 
             template_context.update({
                 'course_name': schedule.enrollment.course.display_name,
-                'course_url': _get_course_home_url(enrollment.course_id),
+                'course_url': _get_trackable_course_home_url(enrollment.course_id),
 
                 'week_num': week_num,
                 'week_highlights': week_highlights,
@@ -371,7 +371,7 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
             yield (user, schedule.enrollment.course.language, template_context)
 
 
-def _get_course_home_url(course_id):
+def _get_trackable_course_home_url(course_id):
     """
     Get the home page URL for the course.
 
