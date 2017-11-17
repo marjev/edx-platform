@@ -368,10 +368,12 @@ class TestCourseVerificationStatus(UrlResetMixin, ModuleStoreTestCase):
         if alt_text:
             self.assertContains(response, alt_text)
 
+        print(response)
         # Verify that the correct banner color is rendered
         self.assertContains(
             response,
-            "<section class=\"course {}\">".format(self.MODE_CLASSES[status])
+            "<section class=\"course {}\" aria-labelledby=\"course-title-{}\">".
+                format(self.MODE_CLASSES[status], self.course.id)
         )
 
         # Verify that the correct copy is rendered on the dashboard
