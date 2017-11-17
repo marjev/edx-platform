@@ -533,6 +533,8 @@ def account_settings_context(request):
 
     site_extra_fields = configuration_helpers.get_value('REGISTRATION_EXTRA_FIELDS', settings.REGISTRATION_EXTRA_FIELDS)
 
+    extended_profile_fields = configuration_helpers.get_value('extended_profile_fields', []) # have to pass the field type (list/text), and also pass the options. from EXTRA_FIELD_OPTIONS in the site configuration.
+
     context = {
         'auth': {},
         'duplicate_provider': None,
@@ -565,7 +567,8 @@ def account_settings_context(request):
         'disable_courseware_js': True,
         'show_program_listing': ProgramsApiConfig.is_enabled(),
         'show_dashboard_tabs': True,
-        'order_history': user_orders
+        'order_history': user_orders,
+        'extended_profile_fields': extended_profile_fields,
     }
 
     for field in RegistrationFormFactory.EXTRA_FIELDS:

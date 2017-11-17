@@ -21,7 +21,8 @@
             platformName,
             contactEmail,
             allowEmailChange,
-            socialPlatforms
+            socialPlatforms,
+            extendedProfileFields
         ) {
             var $accountSettingsElement, userAccountModel, userPreferencesModel, aboutSectionsData,
                 accountsSectionData, ordersSectionData, accountSettingsView, showAccountSettingsPage,
@@ -205,19 +206,29 @@
                 })
             });
 
-            fieldsData.first_name.visibility = true;
-            if (fieldsData.first_name.visibility !== 'hidden') {
+            for (var extendedProfileField in extendedProfileFields) {  // eslint-disable-line guard-for-in, no-restricted-syntax, vars-on-top, max-len
+                //debugger;
                 additionalFields.fields.push({
-                    view: new AccountSettingsFieldViews.TextFieldView({
+                    view: new AccountSettingsFieldViews.ExtendedFieldTextFieldView({
                         model: userAccountModel,
-                        title: gettext('First Name'),
-                        valueAttribute: 'first_name',
-                        helpMessage: gettext('Your First Name.'),
+                        title: extendedProfileFields[extendedProfileField],
+                        fieldName: extendedProfileFields[extendedProfileField],
+                        valueAttribute: 'extended_profile_fields',
+                        helpMessage: gettext('extended_profile_fields: ' + extendedProfileFields[extendedProfileField]),
                         persistChanges: true
                     })
                 });
-            }
 
+                //additionalFields.fields.push({
+                //    view: new AccountSettingsFieldViews.DropdownFieldView({
+                //        model: userAccountModel,
+                //        title: gettext('Year of Birth'),
+                //        valueAttribute: 'year_of_birth',
+                //        options: fieldsData.year_of_birth.options,
+                //        persistChanges: true
+                //    })
+                //});
+            }
 
 
             // Add the social link fields

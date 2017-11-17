@@ -257,6 +257,72 @@
                     }
                 }
             }),
+            ExtendedFieldTextFieldView: FieldViews.TextFieldView.extend({
+                render: function() {
+                    HtmlUtils.setHtml(this.$el, HtmlUtils.template(field_text_account_template)({
+                        id: this.options.valueAttribute + '_' + this.options.field_name,
+                        title: this.options.title,
+                        value: this.modelValue(),
+                        message: this.options.helpMessage,
+                        placeholder: this.options.placeholder || ''
+                    }));
+                    this.delegateEvents();
+                    return this;
+                },
+
+                modelValue: function() {
+                    var extendedProfileFields = this.model.get(this.options.valueAttribute);
+                    for (var i = 0; i < extendedProfileFields.length; i++) { // eslint-disable-line vars-on-top
+                        if (extendedProfileFields[i].field_name === this.options.fieldName) {
+                            return extendedProfileFields[i].field_value;
+                        }
+                    }
+                    return null;
+                },
+                saveValue: function() {
+                    var attributes, value;
+                    if (this.persistChanges === true) {
+                        attributes = {};
+                        value = this.fieldValue() != null ? [{platform: this.options.platform,
+                            social_link: this.fieldValue()}] : [];
+                        attributes[this.options.valueAttribute] = value;
+                        this.saveAttributes(attributes);
+                    }
+                }
+            }),
+            ExtendedFieldListFieldView: FieldViews.DropdownFieldView.extend({
+                render: function() {
+                    HtmlUtils.setHtml(this.$el, HtmlUtils.template(field_text_account_template)({
+                        id: this.options.valueAttribute + '_' + this.options.platform,
+                        title: this.options.title,
+                        value: this.modelValue(),
+                        message: this.options.helpMessage,
+                        placeholder: this.options.placeholder || ''
+                    }));
+                    this.delegateEvents();
+                    return this;
+                },
+
+                modelValue: function() {
+                    var socialLinks = this.model.get(this.options.valueAttribute);
+                    for (var i = 0; i < socialLinks.length; i++) { // eslint-disable-line vars-on-top
+                        if (socialLinks[i].platform === this.options.platform) {
+                            return socialLinks[i].social_link;
+                        }
+                    }
+                    return null;
+                },
+                saveValue: function() {
+                    var attributes, value;
+                    if (this.persistChanges === true) {
+                        attributes = {};
+                        value = this.fieldValue() != null ? [{platform: this.options.platform,
+                            social_link: this.fieldValue()}] : [];
+                        attributes[this.options.valueAttribute] = value;
+                        this.saveAttributes(attributes);
+                    }
+                }
+            }),
             AuthFieldView: FieldViews.LinkFieldView.extend({
                 fieldTemplate: field_social_link_template,
                 className: function() {

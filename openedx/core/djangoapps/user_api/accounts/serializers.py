@@ -112,6 +112,7 @@ class UserReadOnlySerializer(serializers.Serializer):
             "accomplishments_shared": accomplishments_shared,
             "account_privacy": self.configuration.get('default_visibility'),
             "social_links": None,
+            "extended_profile_fields": None,
         }
 
         if user_profile:
@@ -138,6 +139,7 @@ class UserReadOnlySerializer(serializers.Serializer):
                     "social_links": SocialLinkSerializer(
                         user_profile.social_links.all(), many=True
                     ).data,
+                    "extended_profile_fields": get_extended_profile_fields(user_profile, user),
                 }
             )
 
@@ -189,7 +191,7 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
         model = UserProfile
         fields = (
             "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "social_links",
-            "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies"
+            "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies",
         )
         # Currently no read-only field, but keep this so view code doesn't need to know.
         read_only_fields = ()
@@ -326,6 +328,18 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
 
         return instance
 
+def get_extended_profile_fields(user_profile, user):
+    import json
+    extra_fields_dict = json.loads(user_profile.meta)
+    # dummy_meta = {"first_name": "Afzal", "last_name": "Naushahi", "title": "done", "country": "PK", "company": "home", "state": "Punjab"}
+
+    extended_profile_fields = []
+    for field in extra_fields_dict.keys():
+        extended_profile_fields.append({
+            "field_name": field,
+            "field_value": extra_fields_dict[field]
+        })
+    return extended_profile_fields
 
 def get_profile_visibility(user_profile, user, configuration=None):
     """Returns the visibility level for the specified user profile."""

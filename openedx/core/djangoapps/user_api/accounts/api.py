@@ -215,6 +215,7 @@ def update_account_settings(requesting_user, update, username=None):
             existing_user_profile.set_meta(meta)
             existing_user_profile.save()
 
+
     except PreferenceValidationError as err:
         raise AccountValidationError(err.preference_errors)
     except AccountValidationError as err:
