@@ -30,6 +30,10 @@ class EntitlementViewSet(viewsets.ModelViewSet):
     filter_class = CourseEntitlementFilter
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Override the retrieve method to expire a record that is past the
+        policy and is requested via the API before returning that record.
+        """
         instance = self.get_object()
         if not instance.expired_at:
             site_configuration_policy = get_dict('ENTITLEMENT_POLICY')
@@ -37,6 +41,27 @@ class EntitlementViewSet(viewsets.ModelViewSet):
                 instance.expired_at = datetime.utcnow()
                 instance.save()
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override the list method to expire records that are past the
+        policy and requested via the API before returning those records.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        site_configuration_policy = get_dict('ENTITLEMENT_POLICY')
+        for entitlement in queryset:
+            if not entitlement.expired_at and is_entitlement_expired(entitlement, site_configuration_policy):
+                entitlement.expired_at = datetime.utcnow()
+                entitlement.save()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def perform_destroy(self, instance):

@@ -1,6 +1,7 @@
-from datetime import datetime
 import pytz
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
+from datetime import datetime
 
 
 def is_entitlement_expired(entitlement, policy):
