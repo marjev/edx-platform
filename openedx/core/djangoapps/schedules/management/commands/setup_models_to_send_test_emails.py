@@ -1,82 +1,50 @@
 import datetime
 import pytz
+import factory
 
 from django.core.management.base import BaseCommand
 from student.models import CourseEnrollment
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.schedules.models import Schedule, ScheduleConfig
+from openedx.core.djangoapps.schedules.tests.factories import ScheduleFactory, ScheduleConfigFactory
+from student.tests.factories import CourseEnrollmentFactory
+from xmodule.modulestore.tests.factories import CourseFactory, XMODULE_FACTORY_LOCK
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from xmodule.modulestore.django import modulestore
+
+
+class ThreeDayNudgeSchedule(ScheduleFactory):
+    start = factory.Faker('date_time_between', start_date='-3d', end_date='-3d', tzinfo=pytz.UTC)
+
+
+class TenDayNudgeSchedule(ScheduleFactory):
+    start = factory.Faker('date_time_between', start_date='-10d', end_date='-10d', tzinfo=pytz.UTC)
+
+
+class UpgradeReminderSchedule(ScheduleFactory):
+    start = factory.Faker('past_datetime', tzinfo=pytz.UTC)
+    upgrade_deadline = factory.Faker('date_time_between', start_date='+2d', end_date='+2d', tzinfo=pytz.UTC)
+
+
+class ContentHighlightSchedule(ScheduleFactory):
+    start = factory.Faker('date_time_between', start_date='-7d', end_date='-7d', tzinfo=pytz.UTC)
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        self._create_schedule_config_if_none_exists()
-        self._create_schedule_if_none_exist()
-        self._update_schedules()
+        courses = modulestore().get_courses()
 
-    def _create_schedule_config_if_none_exists(self):
-        schedule_configs = self._get_all_schedule_configs()
-        if len(schedule_configs) == 0:
-            self._create_schedule_config()
-            print "Creating ScheduleConfig."
+        max_org_sequence_id = max(int(course.org[4:]) for course in courses if course.org.startswith('org.'))
 
-    def _create_schedule_if_none_exist(self):
-        schedules = self._get_all_schedules()
-        if len(schedules) == 0:
-            a_schedule = self._create_schedule()
-            print "Creating schedule.\nstart: {}\nupgrade_deadline: {}".format(a_schedule.start,
-                                                                               a_schedule.upgrade_deadline)
+        XMODULE_FACTORY_LOCK.enable()
+        CourseFactory.reset_sequence(max_org_sequence_id + 1, force=True)
+        course = CourseFactory()
+        XMODULE_FACTORY_LOCK.disable()
+        course_overview = CourseOverview.load_from_module_store(course.id)
+        ThreeDayNudgeSchedule.create(enrollment__course=course_overview)
+        TenDayNudgeSchedule.create(enrollment__course=course_overview)
+        UpgradeReminderSchedule.create(enrollment__course=course_overview)
+        ContentHighlightSchedule.create(enrollment__course=course_overview)
 
-    def _update_schedules(self):
-        schedules = self._get_all_schedules()
-        assert(len(schedules) > 0)
-
-        for a_schedule in schedules:
-            # TODO: Rewrite _calculate_n_days_from_now to be _calculate_n_days_from_date_m. Rewrite all offset calcs in
-            #       terms of new function
-            three_days_after_start = a_schedule.start + datetime.timedelta(days=3)
-            twenty_one_days_before_upgrade_deadline = a_schedule.upgrade_deadline - datetime.timedelta(days=21)
-
-            if three_days_after_start.day < self._now().day:
-                new_start = self._calculate_n_days_from_now(n=-3)
-                print "Updating 'start' from {0} to {1}".format(a_schedule.start, new_start)
-                a_schedule.start = new_start
-
-            if twenty_one_days_before_upgrade_deadline.day != self._now().day:
-                new_upgrade_deadline = self._calculate_n_days_from_now(n=21)
-                print "Updating 'upgrade_deadline' from {0} to {1}".format(a_schedule.upgrade_deadline,
-                                                                           new_upgrade_deadline)
-                a_schedule.upgrade_deadline = new_upgrade_deadline
-
-            a_schedule.save()
-
-    def _get_all_schedule_configs(self):
-        return ScheduleConfig.objects.all()
-
-    def _get_all_schedules(self):
-        return Schedule.objects.all()
-
-    def _create_schedule(self):
-        honor_enrollment = CourseEnrollment.objects.get(id=1)
-        honor_enrollment.course.self_paced = True
-        a_schedule = Schedule.objects.create(start=self._calculate_n_days_from_now(n=-3),
-                                             upgrade_deadline=self._calculate_n_days_from_now(n=21),
-                                             enrollment=honor_enrollment)
-        a_schedule.save()
-        return a_schedule
-
-    def _create_schedule_config(self):
-        example_dot_com = Site.objects.get(name="example.com")
-        ScheduleConfig.objects.create(site=example_dot_com,
-                                      enabled=True,
-                                      create_schedules=True,
-                                      enqueue_recurring_nudge=True,
-                                      deliver_recurring_nudge=True,
-                                      enqueue_upgrade_reminder=True,
-                                      deliver_upgrade_reminder=True)
-
-    def _calculate_n_days_from_now(self, n):
-        return self._now() + datetime.timedelta(days=n)
-
-    def _now(self):
-        return datetime.datetime.now(tz=pytz.UTC)
+        ScheduleConfigFactory.create(site=Site.objects.get(name='example.com'))
