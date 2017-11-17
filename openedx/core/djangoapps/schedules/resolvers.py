@@ -243,9 +243,6 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
         first_schedule = user_schedules[0]
         context = {
             'course_name': first_schedule.enrollment.course.display_name,
-
-            # For us to be able to track clicks in the email, this URL needs to point to a landing page that does not
-            # result in a redirect so that the GA snippet can register the UTM parameters.
             'course_url': _get_course_home_url(first_schedule.enrollment.course_id),
         }
 
@@ -286,8 +283,6 @@ class UpgradeReminderResolver(BinnedSchedulesBaseResolver):
             course_id_str = str(schedule.enrollment.course_id)
             course_id_strs.append(course_id_str)
             course_links.append({
-                # For us to be able to track clicks in the email, this URL needs to point to a landing page that does
-                # not result in a redirect so that the GA snippet can register the UTM parameters.
                 'url': _get_course_home_url(schedule.enrollment.course_id),
                 'name': schedule.enrollment.course.display_name
             })
@@ -363,9 +358,6 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
 
             template_context.update({
                 'course_name': schedule.enrollment.course.display_name,
-
-                # For us to be able to track clicks in the email, this URL needs to point to a landing page that does
-                # not result in a redirect so that the GA snippet can register the UTM parameters.
                 'course_url': _get_course_home_url(enrollment.course_id),
 
                 'week_num': week_num,
@@ -380,5 +372,17 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
 
 
 def _get_course_home_url(course_id):
+    """
+    Get the home page URL for the course.
+
+    NOTE: For us to be able to track clicks in the email, this URL needs to point to a landing page that does not result
+    in a redirect so that the GA snippet can register the UTM parameters.
+
+    Args:
+        course_id (CourseKey): The course to get the home page URL for.
+
+    Returns:
+        A relative path to the course home page.
+    """
     course_url_name = course_home_url_name(course_id)
     return reverse(course_url_name, args=[str(course_id)])
