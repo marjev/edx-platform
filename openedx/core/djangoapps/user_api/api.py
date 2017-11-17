@@ -278,10 +278,15 @@ class RegistrationFormFactory(object):
         # meant to hold the user's email address.
         email_label = _(u"Email")
 
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's email address.
+        email_instructions = _(u"This is what you will use to login.")
+
         form_desc.add_field(
             "email",
             field_type="email",
             label=email_label,
+            instructions=email_instructions,
             restrictions={
                 "min_length": accounts.EMAIL_MIN_LENGTH,
                 "max_length": accounts.EMAIL_MAX_LENGTH,
@@ -299,6 +304,7 @@ class RegistrationFormFactory(object):
         # Translators: This label appears above a field on the registration form
         # meant to confirm the user's email address.
         email_label = _(u"Confirm Email")
+
         error_msg = accounts.REQUIRED_FIELD_CONFIRM_EMAIL_MSG
 
         form_desc.add_field(
@@ -321,9 +327,14 @@ class RegistrationFormFactory(object):
         # meant to hold the user's full name.
         name_label = _(u"Full Name")
 
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's full name.
+        name_instructions = _(u"This name will be used on any certificates that you earn.")
+
         form_desc.add_field(
             "name",
             label=name_label,
+            instructions=name_instructions,
             restrictions={
                 "max_length": accounts.NAME_MAX_LENGTH,
             },
@@ -341,9 +352,16 @@ class RegistrationFormFactory(object):
         # meant to hold the user's public username.
         username_label = _(u"Public Username")
 
+        username_instructions = _(
+            # Translators: These instructions appear on the registration form, immediately
+            # below a field meant to hold the user's public username.
+            u"The name that will identify you in your courses. "
+            u"It cannot be changed later."
+        )
         form_desc.add_field(
             "username",
             label=username_label,
+            instructions=username_instructions,
             restrictions={
                 "min_length": accounts.USERNAME_MIN_LENGTH,
                 "max_length": accounts.USERNAME_MAX_LENGTH,
@@ -683,6 +701,12 @@ class RegistrationFormFactory(object):
 
         # If we set a country code, make sure it's uppercase for the sake of the form.
         default_country = form_desc._field_overrides.get('country', {}).get('defaultValue')
+
+        country_instructions = _(
+            # Translators: These instructions appear on the registration form, immediately
+            # below a field meant to hold the user's country.
+            u"The country or region where you live."
+        )
         if default_country:
             form_desc.override_field_properties(
                 'country',
@@ -692,6 +716,7 @@ class RegistrationFormFactory(object):
         form_desc.add_field(
             "country",
             label=country_label,
+            instructions=country_instructions,
             field_type="select",
             options=list(countries),
             include_default_option=True,

@@ -1007,6 +1007,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"email",
                 u"required": True,
                 u"label": u"Email",
+                u"instructions": u"This is what you will use to login.",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1021,6 +1022,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"text",
                 u"required": True,
                 u"label": u"Full Name",
+                u"instructions": u"This name will be used on any certificates that you earn.",
                 u"restrictions": {
                     "max_length": 255
                 },
@@ -1034,6 +1036,8 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"text",
                 u"required": True,
                 u"label": u"Public Username",
+                u"instructions": u"The name that will identify you in your courses. "
+                                 u"It cannot be changed later.",
                 u"restrictions": {
                     "min_length": USERNAME_MIN_LENGTH,
                     "max_length": USERNAME_MAX_LENGTH
@@ -1068,6 +1072,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 u"type": u"email",
                 u"required": True,
                 u"label": u"Email",
+                u"instructions": u"This is what you will use to login.",
                 u"restrictions": {
                     "min_length": EMAIL_MIN_LENGTH,
                     "max_length": EMAIL_MAX_LENGTH
@@ -1163,6 +1168,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"email",
                     u"required": True,
                     u"label": u"Email",
+                    u"instructions": u"This is what you will use to login.",
                     u"restrictions": {
                         "min_length": EMAIL_MIN_LENGTH,
                         "max_length": EMAIL_MAX_LENGTH
@@ -1179,6 +1185,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"text",
                     u"required": True,
                     u"label": u"Full Name",
+                    u"instructions": u"This name will be used on any certificates that you earn.",
                     u"restrictions": {
                         "max_length": NAME_MAX_LENGTH,
                     }
@@ -1194,6 +1201,8 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"text",
                     u"required": True,
                     u"label": u"Public Username",
+                    u"instructions": u"The name that will identify you in your courses. "
+                                     u"It cannot be changed later.",
                     u"restrictions": {
                         "min_length": USERNAME_MIN_LENGTH,
                         "max_length": USERNAME_MAX_LENGTH
@@ -1211,6 +1220,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                     u"type": u"select",
                     u"required": True,
                     u"options": country_options,
+                    u"instructions": u"The country or region where you live.",
                     u"errorMessages": {
                         u"required": u"Select your country or region of residence."
                     },
@@ -1476,6 +1486,7 @@ class RegistrationViewTest(ThirdPartyAuthTestMixin, UserAPITestCase):
                 "label": "Country or Region of Residence",
                 "name": "country",
                 "type": "select",
+                "instructions": "The country or region where you live.",
                 "required": True,
                 "options": country_options,
                 "errorMessages": {

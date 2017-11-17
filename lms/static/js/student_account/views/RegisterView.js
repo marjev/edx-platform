@@ -68,13 +68,31 @@
                 },
 
 
+                renderFields: function(fields, className) {
+                    var html = [],
+                        i,
+                        fieldTpl = this.fieldTpl;
+
+                    html.push('<div class="' + className + '">');
+                    for (i = 0; i < fields.length; i++) {
+                        html.push(HtmlUtils.template(fieldTpl)($.extend(fields[i], {
+                            form: this.formType,
+                            requiredStr: this.requiredStr,
+                            optionalStr: this.optionalStr,
+                            supplementalText: fields[i].supplementalText || '',
+                            supplementalLink: fields[i].supplementalLink || ''
+                        })));
+                    }
+                    html.push('</div>');
+                    return html;
+                },
+
                 buildForm: function(data) {
                     var html = [],
                         i,
                         len = data.length,
                         requiredFields = [],
-                        optionalFields = [],
-                        fieldTpl = this.fieldTpl;
+                        optionalFields = [];
 
                     this.fields = data;
 
@@ -91,29 +109,10 @@
                         }
                     }
 
-                    html.push('<div class="required-fields">');
-                    for (i = 0; i < requiredFields.length; i++) {
-                        html.push(HtmlUtils.template(fieldTpl)($.extend(requiredFields[i], {
-                            form: this.formType,
-                            requiredStr: this.requiredStr,
-                            optionalStr: this.optionalStr,
-                            supplementalText: requiredFields[i].supplementalText || '',
-                            supplementalLink: requiredFields[i].supplementalLink || ''
-                        })));
-                    }
-                    html.push('</div>');
-                    html.push('<div class="optional-fields">');
+                    html = this.renderFields(requiredFields, 'required-fields');
 
-                    for (i = 0; i < optionalFields.length; i++) {
-                        html.push(HtmlUtils.template(fieldTpl)($.extend(optionalFields[i], {
-                            form: this.formType,
-                            requiredStr: this.requiredStr,
-                            optionalStr: this.optionalStr,
-                            supplementalText: optionalFields[i].supplementalText || '',
-                            supplementalLink: optionalFields[i].supplementalLink || ''
-                        })));
-                    }
-                    html.push('</div>');
+                    html.push.apply(html, this.renderFields(optionalFields, 'optional-fields'));
+
                     this.render(html.join(''));
                 },
 
@@ -156,60 +155,50 @@
 
                 postRender: function() {
                     var inputs = [
-                            $('#register-name'),
-                            $('#register-email'),
-                            $('#register-username'),
-                            $('#register-password'),
-                            $('#register-country')
+                            this.$('#register-name'),
+                            this.$('#register-email'),
+                            this.$('#register-username'),
+                            this.$('#register-password'),
+                            this.$('#register-country')
                         ],
                         inputTipSelectors = ['tip error', 'tip tip-input'],
-                        focusinStyles = {
-                            position: 'relative',
-                            'padding-top': '0px',
-                            'padding-left': '0px',
-                            opacity: '1.0'
-                        },
-                        focusoutStyles = {
-                            position: 'absolute',
-                            'padding-top': '5px',
-                            'padding-left': '9px',
-                            opacity: '0.75',
-                            'z-index': '1'
-                        },
                         onInputFocus = function() {
                             // Apply on focus styles to input
-                            $(this).prev('label').css(focusinStyles);
+                            $(this).prev('label').addClass('focus-in');
+                            $(this).prev('label').removeClass('focus-out');
 
                             // Show each input tip
                             $(this).siblings().each(function() {
                                 if (inputTipSelectors.includes($(this).attr('class'))) {
-                                    $(this).show();
+                                    $(this).removeClass('hidden');
                                 }
                             });
                         },
                         onInputFocusOut = function() {
                             // If input has no text apply focus out styles
                             if ($(this).val().length === 0) {
-                                $(this).prev('label').css(focusoutStyles);
+                                $(this).prev('label').addClass('focus-out');
+                                $(this).prev('label').removeClass('focus-in');
                             }
 
                             // Hide each input tip
                             $(this).siblings().each(function() {
                                 if (inputTipSelectors.includes($(this).attr('class'))) {
-                                    $(this).hide();
+                                    $(this).addClass('hidden');
                                 }
                             });
                         },
                         handleInputBehavior = function(input) {
                             // Initially put label in input
                             if (input.val().length === 0) {
-                                input.prev('label').css(focusoutStyles);
+                                input.prev('label').addClass('focus-out');
+                                input.prev('label').removeClass('focus-in');
                             }
 
                             // Initially hide each input tip
                             input.siblings().each(function() {
                                 if (inputTipSelectors.includes($(this).attr('class'))) {
-                                    $(this).hide();
+                                    $(this).addClass('hidden');
                                 }
                             });
 
@@ -219,18 +208,20 @@
                         handleAutocomplete = function() {
                             inputs.forEach(function(input) {
                                 if (input.val().length === 0 && !input.is(':-webkit-autofill')) {
-                                    input.prev('label').css(focusoutStyles);
+                                    input.prev('label').addClass('focus-out');
+                                    input.prev('label').removeClass('focus-in');
                                 } else {
-                                    input.prev('label').css(focusinStyles);
+                                    input.prev('label').addClass('focus-in');
+                                    input.prev('label').removeClass('focus-out');
                                 }
                             });
                         };
 
                     FormView.prototype.postRender.call(this);
-                    $('.optional-fields').hide();
+                    $('.optional-fields').addClass('hidden');
                     $('#toggle_optional_fields').change(function() {
                         window.analytics.track('edx.bi.user.register.optional_fields_selected');
-                        $('.optional-fields').toggle(300);
+                        $('.optional-fields').toggleClass('hidden');
                     });
 
                     $('#register-country option:first').html('');

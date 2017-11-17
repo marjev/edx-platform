@@ -485,13 +485,13 @@
 
                 it('hides optional fields by default', function() {
                     createRegisterView(this);
-                    expect(view.$('.optional-fields')).not.toBeVisible();
+                    expect(view.$('.optional-fields')).toHaveClass('hidden');
                 });
 
                 it('displays optional fields when checkbox is selected', function() {
                     createRegisterView(this);
                     $('#toggle_optional_fields').click();
-                    expect(view.$('.optional-fields')).toBeVisible();
+                    expect(view.$('.optional-fields')).not.toHaveClass('hidden');
                 });
 
                 it('displays a modal with the terms of service', function() {
