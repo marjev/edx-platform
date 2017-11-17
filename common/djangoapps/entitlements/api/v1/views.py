@@ -5,11 +5,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from edx_rest_framework_extensions.authentication import JwtAuthentication
 from rest_framework import permissions, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.response import Response
 
 from entitlements.api.v1.filters import CourseEntitlementFilter
 from entitlements.models import CourseEntitlement
 from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from student.models import CourseEnrollment
+
+from datetime import datetime
+from openedx.core.djangoapps.site_configuration.helpers import get_dict
+from entitlements.helpers import is_entitlement_expired
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +28,16 @@ class EntitlementViewSet(viewsets.ModelViewSet):
     serializer_class = CourseEntitlementSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = CourseEntitlementFilter
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.expired_at:
+            site_configuration_policy = get_dict('ENTITLEMENT_POLICY')
+            if is_entitlement_expired(instance, site_configuration_policy):
+                instance.expired_at = datetime.utcnow()
+                instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def perform_destroy(self, instance):
         """

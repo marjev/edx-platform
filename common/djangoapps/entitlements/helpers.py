@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
 
@@ -11,7 +12,9 @@ def is_entitlement_expired(entitlement, policy):
     :param policy:
     :return:
     """
-    return ((datetime.utcnow() - entitlement.created).days < policy.expiration_period_days and
+    utc = pytz.UTC
+
+    return ((datetime.utcnow().replace(tzinfo=utc) - entitlement.created).days > policy['expiration_period_days'] and
             not entitlement.enrollment_course_run)
 
 
@@ -23,8 +26,9 @@ def is_entitlement_refundable(entitlement, policy):
     :param policy:
     :return:
     """
+    utc = pytz.UTC
 
-    return ((datetime.utcnow() - entitlement.created).days < policy.refund_period_days and
+    return ((datetime.utcnow().replace(tzinfo=utc) - entitlement.created).days > policy['refund_period_days'] and
             not entitlement.entitlement.enrollment_course_run)
 
 
@@ -38,9 +42,11 @@ def is_entitlement_regainable(entitlement, policy):
     :param policy:
     :return:
     """
+
     if entitlement.enrollment_course_run:
+        utc = pytz.UTC
         course_overview = CourseOverview.objects.filter(id=entitlement.enrollment_course_run.course_id)
-        now = datetime.utcnow()
-        return ((now - course_overview.start).days < policy.regain_period_days or
-                (now - entitlement.enrollment_course_run.created).days < policy.regain_period_days)
+        now = datetime.utcnow().replace(tzinfo=utc)
+        return ((now - course_overview.start).days > policy['regain_period_days'] or
+                (now - entitlement.enrollment_course_run.created).days > policy['regain_period_days'])
     return False

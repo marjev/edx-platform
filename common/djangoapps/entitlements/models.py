@@ -1,12 +1,8 @@
 import uuid as uuid_tools
 
-from datetime import datetime
 from django.conf import settings
 from django.db import models
 from model_utils.models import TimeStampedModel
-
-from openedx.core.djangoapps.site_configuration.helpers import get_dict
-from entitlements.helpers import is_entitlement_expired
 
 
 class CourseEntitlement(TimeStampedModel):
@@ -17,7 +13,7 @@ class CourseEntitlement(TimeStampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     uuid = models.UUIDField(default=uuid_tools.uuid4, editable=False)
     course_uuid = models.UUIDField(help_text='UUID for the Course, not the Course Run')
-    _expired_at = models.DateTimeField(
+    expired_at = models.DateTimeField(
         null=True,
         help_text='The date that an entitlement expired, if NULL the entitlement has not expired.'
     )
@@ -28,12 +24,3 @@ class CourseEntitlement(TimeStampedModel):
         help_text='The current Course enrollment for this entitlement. If NULL the Learner has not enrolled.'
     )
     order_number = models.CharField(max_length=128, null=True)
-
-    @property
-    def expired_at(self):
-        if not self._expired_at:
-            site_configuration_policy = get_dict('ENTITLEMENT_POLICY')
-            if is_entitlement_expired(self, site_configuration_policy):
-                self._expired_at = datetime.utcnow()
-                self.save()
-        return self._expired_at
