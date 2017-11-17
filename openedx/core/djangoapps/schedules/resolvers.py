@@ -10,7 +10,6 @@ from django.core.urlresolvers import reverse
 from django.db.models import F, Q
 from django.utils.formats import dateformat, get_format
 
-
 from edx_ace.recipient_resolver import RecipientResolver
 from edx_ace.recipient import Recipient
 
@@ -22,7 +21,7 @@ from openedx.core.djangoapps.schedules.models import Schedule, ScheduleExperienc
 from openedx.core.djangoapps.schedules.utils import PrefixedDebugLoggerMixin
 from openedx.core.djangoapps.schedules.template_context import get_base_template_context
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-
+from openedx.features.course_experience import course_home_url_name
 
 LOG = logging.getLogger(__name__)
 
@@ -244,7 +243,10 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
         first_schedule = user_schedules[0]
         context = {
             'course_name': first_schedule.enrollment.course.display_name,
-            'course_url': reverse('course_root', args=[str(first_schedule.enrollment.course_id)]),
+
+            # For us to be able to track clicks in the email, this URL needs to point to a landing page that does not
+            # result in a redirect so that the GA snippet can register the UTM parameters.
+            'course_url': _get_course_home_url(first_schedule.enrollment.course_id),
         }
 
         # Information for including upsell messaging in template.
@@ -284,7 +286,9 @@ class UpgradeReminderResolver(BinnedSchedulesBaseResolver):
             course_id_str = str(schedule.enrollment.course_id)
             course_id_strs.append(course_id_str)
             course_links.append({
-                'url': reverse('course_root', args=[course_id_str]),
+                # For us to be able to track clicks in the email, this URL needs to point to a landing page that does
+                # not result in a redirect so that the GA snippet can register the UTM parameters.
+                'url': _get_course_home_url(schedule.enrollment.course_id),
                 'name': schedule.enrollment.course.display_name
             })
 
@@ -357,16 +361,24 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
             except CourseUpdateDoesNotExist:
                 continue
 
-            course_id_str = str(enrollment.course_id)
             template_context.update({
                 'course_name': schedule.enrollment.course.display_name,
-                'course_url': reverse('course_root', args=[course_id_str]),
+
+                # For us to be able to track clicks in the email, this URL needs to point to a landing page that does
+                # not result in a redirect so that the GA snippet can register the UTM parameters.
+                'course_url': _get_course_home_url(enrollment.course_id),
+
                 'week_num': week_num,
                 'week_highlights': week_highlights,
 
                 # This is used by the bulk email optout policy
-                'course_ids': [course_id_str],
+                'course_ids': [str(enrollment.course_id)],
             })
             template_context.update(_get_upsell_information_for_schedule(user, schedule))
 
             yield (user, schedule.enrollment.course.language, template_context)
+
+
+def _get_course_home_url(course_id):
+    course_url_name = course_home_url_name(course_id)
+    return reverse(course_url_name, args=[str(course_id)])
