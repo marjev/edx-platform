@@ -1,7 +1,8 @@
-import pytz
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-
 from datetime import datetime, timedelta
+
+import pytz
+
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
 
 def is_entitlement_expired(entitlement, policy):
@@ -56,5 +57,9 @@ def is_entitlement_regainable(entitlement, policy):
 def get_days_until_expiration(entitlement, policy):
     """
     Returns an integer of number of days until the entitlement expires
+
+    :param entitlement:
+    :param policy:
+    :return:
     """
     return entitlement.created + timedelta(days=policy['expiration_period_days'])
